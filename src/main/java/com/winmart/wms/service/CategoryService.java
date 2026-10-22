@@ -8,12 +8,15 @@ import com.winmart.wms.exception.ResourceNotFoundException;
 import com.winmart.wms.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.winmart.wms.audit.AuditAction;
+import com.winmart.wms.audit.Audited;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -31,6 +34,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.CREATE, entity = "Category")
     public CategoryResponse createCategory(CategoryRequest request) {
         if (categoryRepository.existsByCode(request.getCode())) {
             throw new BadRequestException("Mã ngành hàng đã tồn tại: " + request.getCode());
@@ -46,6 +50,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.UPDATE, entity = "Category")
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngành hàng với ID: " + id));
@@ -62,6 +67,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.DELETE, entity = "Category")
     public void deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy ngành hàng với ID: " + id);

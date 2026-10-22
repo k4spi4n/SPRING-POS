@@ -1,6 +1,7 @@
 package com.winmart.wms.controller;
 
 import com.winmart.wms.common.ApiResponse;
+import com.winmart.wms.dto.common.CancelRequest;
 import com.winmart.wms.dto.receipt.ReceiptCreateRequest;
 import com.winmart.wms.dto.receipt.ReceiptResponse;
 import com.winmart.wms.service.ReceiptService;
@@ -52,5 +53,17 @@ public class ReceiptController {
         ReceiptResponse response = receiptService.createReceipt(request, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo phiếu nhập kho thành công", response));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Hủy phiếu nhập kho (Yêu cầu ADMIN hoặc MANAGER)",
+            description = "Trừ lại tồn kho của các lô đã nhập. Bị từ chối nếu hàng đã được xuất đi. Mỗi phiếu chỉ hủy được 1 lần.")
+    public ResponseEntity<ApiResponse<ReceiptResponse>> cancelReceipt(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        ReceiptResponse response = receiptService.cancelReceipt(id, request.getReason(), userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("Hủy phiếu nhập kho thành công", response));
     }
 }

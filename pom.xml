@@ -45,6 +45,18 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- AOP: logging / performance monitoring / audit aspects -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- Actuator + Micrometer: health, metrics, loggers -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Database: H2 for Instant Out-of-the-Box Demo, MySQL for Production -->
         <dependency>
             <groupId>com.h2database</groupId>

@@ -2,6 +2,10 @@ server:
   port: 8080
   servlet:
     context-path: /
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
 
 spring:
   application:
@@ -12,30 +16,59 @@ spring:
     url: jdbc:h2:mem:winmart_wms_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=USER
     driver-class-name: org.h2.Driver
     username: sa
-    password: 
+    password:
 
   h2:
     console:
       enabled: true
       path: /h2-console
       settings:
-        web-allow-others: true
+        web-allow-others: false
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        # Performance monitoring: log mọi câu SQL chậm hơn ngưỡng (logger org.hibernate.SQL_SLOW)
+        session.events.log.LOG_QUERIES_SLOWER_THAN_MS: 200
+        # Bật Hibernate Statistics -> Micrometer tự xuất metric hibernate.* qua Actuator
+        generate_statistics: true
+        # Nạp lazy theo lô 50 phần tử thay vì từng phần tử -> giảm mạnh N+1 select
+        default_batch_fetch_size: 50
     open-in-view: false
 
-# Cấu hình JWT Authentication
+  jackson:
+    default-property-inclusion: non_null
+
 app:
   jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-    expiration-ms: 86400000 # 24 giờ
+    # BẮT BUỘC đặt biến môi trường JWT_SECRET (>= 32 ký tự) ở môi trường thật.
+    # Giá trị mặc định dưới đây chỉ dùng cho demo/dev và sẽ bị cảnh báo khi khởi động.
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 giờ
+    issuer: winmart-wms
+
+  security:
+    # Khóa tạm tài khoản/IP sau N lần đăng nhập sai liên tiếp (chống brute-force)
+    login:
+      max-attempts: 5
+      lock-duration-minutes: 15
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:8080}
+
+  # Performance monitoring
+  performance:
+    # Phương thức service chạy lâu hơn ngưỡng này sẽ được log WARN
+    slow-service-threshold-ms: 500
+    # Request HTTP chậm hơn ngưỡng này sẽ được log WARN
+    slow-request-threshold-ms: 1000
+
+  # Cảnh báo
+  inventory:
+    expiry-warning-days: 30
 
 # Cấu hình Swagger / OpenAPI Documentation
 springdoc:
@@ -46,7 +79,43 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
 
+# Actuator: chỉ health/info công khai, các endpoint còn lại yêu cầu ROLE_ADMIN (xem SecurityConfig)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles: ADMIN
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        wms.service.execution: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: WinMart Warehouse Management System
+    version: 1.0.0
+
 logging:
   level:
+    root: INFO
     com.winmart.wms: INFO
     org.springframework.security: WARN
+    # Ngưỡng SQL chậm (xem session.events.log.LOG_QUERIES_SLOWER_THAN_MS ở trên)
+    org.hibernate.SQL_SLOW: INFO
+    # Statistics vẫn được thu thập cho Micrometer, nhưng không in "Session Metrics" mỗi session
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: WARN
+  file:
+    # Thư mục chứa file log (app.log, error.log, audit.log) - xem logback-spring.xml
+    path: ${LOG_PATH:logs}

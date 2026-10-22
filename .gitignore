@@ -34,3 +34,6 @@ build/
 ### Logs & Temp ###
 *.log
 *.tmp
+
+### App log directory ###
+logs/

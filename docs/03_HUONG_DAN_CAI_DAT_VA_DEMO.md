@@ -137,10 +137,14 @@ mvn spring-boot:run -Dspring-boot.run.profiles=mysql
      ```json
      {
        "success": false,
+       "errorCode": "INSUFFICIENT_STOCK",
        "message": "Sản phẩm [VNM-100-1L - Sữa tươi tiệt trùng Vinamilk...] không đủ tồn kho. Tồn hiện tại: 250, Yêu cầu xuất: 99999",
+       "path": "/api/v1/issues",
+       "requestId": "c8c46fe8a1154b04",
        "timestamp": "..."
      }
      ```
+   - `requestId` trùng với header `X-Request-Id` và với dòng log tương ứng trong `logs/app.log` (xem Tài liệu 04).
    - Điểm nhấn kỹ thuật: Minh họa cho hội đồng thấy `@Transactional` đã tự động Rollback, không có dữ liệu rác nào bị ghi vào CSDL.
 
 ---

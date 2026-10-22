@@ -15,12 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.winmart.wms.audit.AuditAction;
+import com.winmart.wms.audit.Audited;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -62,6 +65,7 @@ public class ProductService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.CREATE, entity = "Product")
     public ProductResponse createProduct(ProductRequest request) {
         if (productRepository.existsBySku(request.getSku())) {
             throw new BadRequestException("Mã SKU đã tồn tại: " + request.getSku());
@@ -96,6 +100,7 @@ public class ProductService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.UPDATE, entity = "Product")
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
@@ -134,6 +139,7 @@ public class ProductService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.DELETE, entity = "Product")
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id);

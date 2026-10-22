@@ -4,13 +4,24 @@ spring:
       on-profile: mysql
 
   datasource:
-    url: jdbc:mysql://localhost:3306/winmart_wms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: rootpassword
+    url: ${DB_URL:jdbc:mysql://localhost:3306/winmart_wms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:rootpassword}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  h2:
+    console:
+      enabled: false
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+
+# Profile "mysql" dùng cho môi trường gần production: tắt Swagger UI công khai
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false

@@ -1,0 +1,2 @@
+github: https://github.com/k4spi4n/SPRING-POS
+jira: https://thaibinhakashi2.atlassian.net/jira/software/projects/SCRUM/summary?atlOrigin=eyJpIjoiNTllMzJlOGZiMzk5NGExN2E3Nzc1YjAzNjhmNmIxYjUiLCJwIjoiaiJ9

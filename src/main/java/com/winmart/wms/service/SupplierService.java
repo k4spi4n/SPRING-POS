@@ -8,12 +8,15 @@ import com.winmart.wms.exception.ResourceNotFoundException;
 import com.winmart.wms.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.winmart.wms.audit.AuditAction;
+import com.winmart.wms.audit.Audited;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SupplierService {
 
     private final SupplierRepository supplierRepository;
@@ -31,6 +34,7 @@ public class SupplierService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.CREATE, entity = "Supplier")
     public SupplierResponse createSupplier(SupplierRequest request) {
         if (supplierRepository.existsByCode(request.getCode())) {
             throw new BadRequestException("Mã nhà cung cấp đã tồn tại: " + request.getCode());
@@ -49,6 +53,7 @@ public class SupplierService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.UPDATE, entity = "Supplier")
     public SupplierResponse updateSupplier(Long id, SupplierRequest request) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhà cung cấp với ID: " + id));
@@ -68,6 +73,7 @@ public class SupplierService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.DELETE, entity = "Supplier")
     public void deleteSupplier(Long id) {
         if (!supplierRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy nhà cung cấp với ID: " + id);

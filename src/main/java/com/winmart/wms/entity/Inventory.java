@@ -3,6 +3,7 @@ package com.winmart.wms.entity;
 import com.winmart.wms.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
 
 @Getter
 @Setter
@@ -10,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Check(constraints = "quantity >= 0") // Chốt chặn cuối cùng ở tầng CSDL: tồn kho không bao giờ âm
 @Table(name = "inventories", uniqueConstraints = {
         @UniqueConstraint(name = "uk_warehouse_batch", columnNames = {"warehouse_id", "batch_id"})
 })

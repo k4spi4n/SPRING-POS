@@ -1,6 +1,7 @@
 package com.winmart.wms.controller;
 
 import com.winmart.wms.common.ApiResponse;
+import com.winmart.wms.dto.common.CancelRequest;
 import com.winmart.wms.dto.issue.IssueCreateRequest;
 import com.winmart.wms.dto.issue.IssueResponse;
 import com.winmart.wms.service.IssueService;
@@ -52,5 +53,17 @@ public class IssueController {
         IssueResponse response = issueService.createIssue(request, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo phiếu xuất kho thành công", response));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Hủy phiếu xuất kho (Yêu cầu ADMIN hoặc MANAGER)",
+            description = "Hoàn trả tồn về đúng các lô đã xuất và ghi bút toán điều chỉnh. Mỗi phiếu chỉ hủy được 1 lần.")
+    public ResponseEntity<ApiResponse<IssueResponse>> cancelIssue(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        IssueResponse response = issueService.cancelIssue(id, request.getReason(), userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("Hủy phiếu xuất kho thành công", response));
     }
 }
