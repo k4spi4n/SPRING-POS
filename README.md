@@ -28,7 +28,7 @@ Hệ thống được thiết kế theo tiêu chuẩn đồ án chất lượng 
 - **Security**: Spring Security 6 + Stateless JWT (JJWT 0.12.6)
 - **ORM & Data**: Spring Data JPA, Hibernate ORM
 - **Database**:
-  - H2 Database (In-Memory, chế độ Zero-Config chạy ngay không cần cài đặt DB)
+  - H2 Database (In-Memory, profile `dev`, không cần cài đặt DB)
   - Hỗ trợ sẵn cấu hình MySQL 8 qua profile `mysql`
 - **Documentation**: Springdoc OpenAPI 3 (Swagger UI tích hợp xác thực Bearer Token)
 - **Tiện ích**: Lombok, Jakarta Bean Validation
@@ -79,7 +79,7 @@ Chi tiết, bảng mã lỗi và cách kiểm chứng xem [Tài liệu 04](docs/
 | **Auditing** | `createdBy/updatedBy` tự động (JPA Auditing) + bảng bất biến `audit_logs` & `audit.log` ghi ai làm gì (kể cả thất bại, đăng nhập, bị từ chối); tra cứu `GET /api/v1/audit-logs` (ADMIN). |
 | **Exception handling** | Một cấu trúc lỗi duy nhất (`errorCode`, `path`, `requestId`), ánh xạ đầy đủ 4xx, lỗi 500 không lộ chi tiết nội bộ. |
 
-> ⚠️ **Triển khai thật:** đặt biến môi trường `JWT_SECRET` (≥ 32 ký tự). Secret demo trong `application.yml` chỉ để chạy thử và sẽ bị cảnh báo khi khởi động. Chạy profile `mysql` để tắt H2 Console và Swagger UI.
+> **Triển khai thật:** dùng profile `mysql` (mặc định nếu không chọn profile), cung cấp `JWT_SECRET`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` qua biến môi trường. H2 Console và Swagger bị tắt, không nạp dữ liệu hay tài khoản demo. Chỉ bật `dev` trên máy phát triển.
 
 ---
 
@@ -88,21 +88,34 @@ Chi tiết, bảng mã lỗi và cách kiểm chứng xem [Tài liệu 04](docs/
 ### Cách 1: Chạy ngay lập tức với H2 Database (Khuyến nghị khi chấm điểm)
 Chỉ cần máy có cài **Java 21** và **Maven**:
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 > Hệ thống sẽ tự động tạo bảng và nạp sẵn dữ liệu mẫu thực tế về sản phẩm WinMart, tài khoản test và các lô hàng cận date.
+> Profile `dev` tự sinh JWT secret ngẫu nhiên nếu chưa đặt `JWT_SECRET`; token cũ hết hiệu lực sau khi khởi động lại. Dữ liệu H2 chỉ tồn tại trong lần chạy đó.
 
 - **Truy cập Swagger UI (Thao tác chính)**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 - **Truy cập H2 Console**: [http://localhost:8080/h2-console](http://localhost:8080/h2-console) (JDBC URL: `jdbc:h2:mem:winmart_wms_db`, User: `sa`, Password: để trống)
 
-### Cách 2: Chạy với MySQL 8
+### Cách 2: Triển khai với MySQL 8 (profile `mysql`)
+Tạo database `winmart_wms` và tài khoản MySQL phù hợp, rồi đặt biến môi trường (ví dụ Bash):
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=mysql
+export DB_URL='jdbc:mysql://localhost:3306/winmart_wms?serverTimezone=UTC'
+export DB_USERNAME='winmart_app'
+export DB_PASSWORD='<mat-khau-MySQL-cua-ban>'
+export JWT_SECRET="$(openssl rand -base64 48)"
+export CORS_ALLOWED_ORIGINS='https://pos.example.com'
+mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
 ```
+
+Trong PowerShell, dùng `$env:TEN_BIEN = 'gia-tri'` thay cho `export`. Cấp một `JWT_SECRET` ngẫu nhiên, giữ ổn định giữa các lần chạy và các instance, tối thiểu 32 byte UTF-8. Không lưu secret/mật khẩu thật vào repo.
+
+Không chọn profile cũng dùng `mysql` với cùng yêu cầu biến môi trường. Thiếu biến bắt buộc hoặc JWT secret quá ngắn sẽ làm ứng dụng không khởi động. `CORS_ALLOWED_ORIGINS` là danh sách origin đầy đủ (scheme, host, port), phân cách bằng dấu phẩy; để trống thì không cho trình duyệt gọi khác origin. `dev` mặc định cho phép `http://localhost:3000`, `4200`, `5173`, `8080`.
+
+Profile `mysql` không tạo tài khoản ban đầu, vai trò hay dữ liệu nghiệp vụ mẫu. Cần cấp vai trò và tài khoản ADMIN ban đầu qua quy trình quản trị CSDL có kiểm soát (mật khẩu lưu dạng BCrypt); sau đó ADMIN tạo người dùng qua API. Không bật kèm `dev` trên môi trường triển khai.
 
 ---
 
-## 🔑 Tài Khoản Thử Nghiệm Nạp Sẵn
+## 🔑 Tài Khoản Thử Nghiệm Nạp Sẵn (chỉ profile `dev`)
 
 | Username | Password | Họ và tên | Quyền hạn |
 | :--- | :--- | :--- | :--- |
