@@ -25,5 +25,9 @@ public class ReceiptResponse {
     private BigDecimal totalAmount;
     private String note;
     private LocalDateTime createdAt;
+    private String createdBy;
+    private String cancelReason;
+    private String cancelledBy;
+    private LocalDateTime cancelledAt;
     private List<ReceiptItemResponse> items;
 }

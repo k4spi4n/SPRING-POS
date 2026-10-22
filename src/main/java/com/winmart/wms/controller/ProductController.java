@@ -3,6 +3,7 @@ package com.winmart.wms.controller;
 import com.winmart.wms.common.ApiResponse;
 import com.winmart.wms.common.PageResponse;
 import com.winmart.wms.dto.product.ProductRequest;
+import com.winmart.wms.exception.BadRequestException;
 import com.winmart.wms.dto.product.ProductResponse;
 import com.winmart.wms.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,12 +19,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 @Tag(name = "Product", description = "API Quản lý Sản phẩm, Hàng hóa, Mã vạch (Barcode/SKU)")
 public class ProductController {
+
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final Set<String> SORTABLE_FIELDS =
+            Set.of("id", "sku", "name", "barcode", "sellingPrice", "purchasePrice", "createdAt");
 
     private final ProductService productService;
 
@@ -36,7 +42,13 @@ public class ProductController {
             @RequestParam(defaultValue = "id,desc") String[] sort) {
 
         Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+        // Chỉ cho sắp xếp theo các trường đã liệt kê: tránh lỗi 500 do tên trường lạ và tránh sort theo cột không có index
+        if (!SORTABLE_FIELDS.contains(sort[0])) {
+            throw new BadRequestException("Không hỗ trợ sắp xếp theo '" + sort[0] + "'. Cho phép: " + SORTABLE_FIELDS);
+        }
+        // Giới hạn kích thước trang để 1 request không kéo cả bảng lên bộ nhớ
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
+                Sort.by(direction, sort[0]));
 
         return ResponseEntity.ok(ApiResponse.success(productService.getProducts(search, pageable)));
     }

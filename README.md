@@ -63,7 +63,23 @@ Controller (REST API + Validation)
 6. **Nhật ký Biến động kho (Audit Trail)**:
    - Ghi lại vết lịch sử mọi giao dịch (Inbound, Outbound) kèm số dư tồn kho sau mỗi bước.
 7. **Báo cáo Thống kê & Dashboard**:
-   - Thống kê tổng quan KPIs: Tổng mặt hàng, tổng giá trị kho hàng, số phiếu nhập/xuất, cảnh báo cận date.
+   - Thống kê tổng quan KPIs: Tổng mặt hàng, tổng giá trị kho hàng, số phiếu nhập/xuất, cảnh báo cận date, cảnh báo tồn thấp (tính bằng truy vấn tổng hợp tại CSDL).
+8. **Hủy phiếu nhập/xuất (bù trừ giao dịch)**: hoàn/trừ tồn đúng lô, ghi bút toán điều chỉnh, mỗi phiếu chỉ hủy được một lần.
+9. **Quy tắc hạn sử dụng**: không điều chuyển hàng hết hạn ra cửa hàng, chỉ xuất hủy hàng hết hạn, không nhập lô đã quá hạn.
+
+### 🛡️ Các Thành Phần Cắt Ngang (Cross-Cutting Concerns)
+Chi tiết, bảng mã lỗi và cách kiểm chứng xem [Tài liệu 04](docs/04_BAO_MAT_GIAM_SAT_KIEM_TOAN.md).
+
+| Mảng | Nội dung chính |
+| :--- | :--- |
+| **Logging** | Logback rolling (`logs/app.log`, `error.log`, `audit.log`); `X-Request-Id` + username + IP trong MDC cho mọi dòng log; access-log từng request. |
+| **Security** | JWT có `jti`/issuer, đăng xuất thu hồi token, khóa tạm thời khi sai mật khẩu nhiều lần, tạo tài khoản chỉ ADMIN, vô hiệu hóa user có hiệu lực tức thì, 401/403 dạng JSON, CORS theo cấu hình, secret qua biến môi trường. |
+| **Transaction** | `readOnly` mặc định, khóa bi quan `FOR UPDATE` chống xuất lố khi đồng thời, khóa theo thứ tự chống deadlock, `CHECK (quantity >= 0)`, sự kiện `AFTER_COMMIT` cảnh báo tồn thấp. |
+| **Performance monitoring** | Actuator + Micrometer: Timer mọi phương thức service, metric nghiệp vụ, log service/request/SQL chậm, health probes. |
+| **Auditing** | `createdBy/updatedBy` tự động (JPA Auditing) + bảng bất biến `audit_logs` & `audit.log` ghi ai làm gì (kể cả thất bại, đăng nhập, bị từ chối); tra cứu `GET /api/v1/audit-logs` (ADMIN). |
+| **Exception handling** | Một cấu trúc lỗi duy nhất (`errorCode`, `path`, `requestId`), ánh xạ đầy đủ 4xx, lỗi 500 không lộ chi tiết nội bộ. |
+
+> ⚠️ **Triển khai thật:** đặt biến môi trường `JWT_SECRET` (≥ 32 ký tự). Secret demo trong `application.yml` chỉ để chạy thử và sẽ bị cảnh báo khi khởi động. Chạy profile `mysql` để tắt H2 Console và Swagger UI.
 
 ---
 
@@ -102,3 +118,4 @@ Toàn bộ tài liệu phân tích và thiết kế được lưu tại thư m�
 - [📄 Tài liệu 01: Khảo sát Bài toán & Xác định Phạm vi (SRS)](file:///d:/CODE/CMC/SPRING/docs/01_BAI_TOAN_VA_PHAM_VI.md)
 - [📄 Tài liệu 02: Thiết kế Kiến trúc Phân tầng & Cơ sở Dữ liệu (ERD)](file:///d:/CODE/CMC/SPRING/docs/02_THIET_KE_KIEN_TRUC_VA_CSDL.md)
 - [📄 Tài liệu 03: Hướng dẫn Cài đặt & Kịch bản Demo Bảo vệ Đồ án](file:///d:/CODE/CMC/SPRING/docs/03_HUONG_DAN_CAI_DAT_VA_DEMO.md)
+- [📄 Tài liệu 04: Bảo mật, Giao dịch, Logging, Giám sát hiệu năng, Kiểm toán & Xử lý lỗi](file:///d:/CODE/CMC/SPRING/docs/04_BAO_MAT_GIAM_SAT_KIEM_TOAN.md)

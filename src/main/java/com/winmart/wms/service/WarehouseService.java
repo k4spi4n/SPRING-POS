@@ -8,12 +8,15 @@ import com.winmart.wms.exception.ResourceNotFoundException;
 import com.winmart.wms.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.winmart.wms.audit.AuditAction;
+import com.winmart.wms.audit.Audited;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
@@ -37,6 +40,7 @@ public class WarehouseService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.CREATE, entity = "Warehouse")
     public WarehouseResponse createWarehouse(WarehouseRequest request) {
         if (warehouseRepository.existsByCode(request.getCode())) {
             throw new BadRequestException("Mã kho đã tồn tại: " + request.getCode());
@@ -54,6 +58,7 @@ public class WarehouseService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.UPDATE, entity = "Warehouse")
     public WarehouseResponse updateWarehouse(Long id, WarehouseRequest request) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kho hàng với ID: " + id));
@@ -74,6 +79,7 @@ public class WarehouseService {
     }
 
     @Transactional
+    @Audited(action = AuditAction.DELETE, entity = "Warehouse")
     public void deleteWarehouse(Long id) {
         if (!warehouseRepository.existsById(id)) {
             throw new ResourceNotFoundException("Không tìm thấy kho hàng với ID: " + id);
