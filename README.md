@@ -48,6 +48,7 @@ Controller (REST API + Validation)
 1. **Bảo mật & Phân quyền Role-based (RBAC)**:
    - 3 cấp độ: `ROLE_ADMIN`, `ROLE_MANAGER` (Thủ kho), `ROLE_STAFF` (Nhân viên).
    - Bảo mật tầng method bằng `@PreAuthorize`.
+   - Chỉ ADMIN được gọi `POST /api/v1/auth/register` để tạo tài khoản và chọn vai trò. Đăng nhập qua `/api/v1/auth/login` để lấy JWT; thiếu token trả 401, STAFF/MANAGER đăng ký trả 403.
 2. **Quản lý Hàng hóa & Ngành hàng**:
    - Quản lý mã SKU, mã vạch (Barcode), giá vốn, giá bán, đơn vị tính và định mức tồn kho tối thiểu.
 3. **Nhập kho Inbound (Goods Receipt)**:
