@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Đăng ký tài khoản mới", description = "Tạo mới tài khoản nhân viên hoặc quản lý kho")
+    @Operation(summary = "Đăng ký tài khoản mới", description = "Chỉ ADMIN được tạo tài khoản với vai trò hợp lệ")
     public ResponseEntity<ApiResponse<UserProfileResponse>> register(@Valid @RequestBody RegisterRequest request) {
         UserProfileResponse response = authService.register(request);
         return ResponseEntity.ok(ApiResponse.success("Đăng ký tài khoản thành công", response));
