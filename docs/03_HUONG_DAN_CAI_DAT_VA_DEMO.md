@@ -10,12 +10,12 @@
 - **Apache Maven**: Phiên bản 3.8.x hoặc 3.9.x trở lên.
 - **Trình duyệt Web**: Chrome, Edge, Firefox (để mở giao diện Swagger UI).
 
-### 1.2. Khởi chạy ứng dụng (Mặc định H2 In-Memory - Không cần cài Database)
-Dự án được cấu hình sẵn chế độ "Zero-Config" sử dụng H2 Database. Mọi bảng biểu và dữ liệu mẫu thực tế sẽ tự động được khởi tạo ngay khi ứng dụng khởi động.
+### 1.2. Khởi chạy ứng dụng (profile `dev` với H2 In-Memory)
+Chỉ profile `dev` sử dụng H2 Database và tự nạp dữ liệu, tài khoản demo. JWT secret được sinh ngẫu nhiên mỗi lần chạy nếu chưa đặt `JWT_SECRET`.
 
 Mở terminal tại thư mục gốc dự án (`d:/CODE/CMC/SPRING`):
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 Khi nhìn thấy dòng log:
@@ -26,20 +26,21 @@ Started WinmartWmsApplication in ... seconds
 ```
 -> Ứng dụng đã khởi chạy thành công tại cổng: **`http://localhost:8080`**.
 
-### 1.3. Chuyển sang MySQL 8 (Nếu muốn demo trên Database thật)
+### 1.3. Triển khai với MySQL 8
 1. Tạo database trống trên MySQL:
 ```sql
 CREATE DATABASE winmart_wms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-2. Khởi chạy với profile `mysql`:
+2. Đặt `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` và danh sách origin `CORS_ALLOWED_ORIGINS` qua biến môi trường theo [README](../README.md), rồi chạy profile `mysql`:
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=mysql
+mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
 ```
-*(Có thể tùy chỉnh user/password trong file `src/main/resources/application-mysql.yml`)*
+Profile `mysql` cũng là mặc định khi không chọn profile. H2 Console và Swagger bị tắt; không nạp dữ liệu mẫu, vai trò hay tài khoản demo. Cấp vai trò và ADMIN ban đầu qua quy trình quản trị CSDL có kiểm soát; không bật kèm `dev` khi triển khai.
 
 ---
 
 ## 2. TRANG QUẢN TRỊ & TÀI KHOẢN TRUY CẬP
+Các địa chỉ và tài khoản bên dưới chỉ dành cho profile `dev`.
 
 ### 2.1. Địa chỉ các trang giao diện
 - **Tài liệu API Swagger UI (Giao diện chính để thao tác và demo)**:
