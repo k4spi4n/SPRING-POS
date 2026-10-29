@@ -80,6 +80,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET,
+                            "/", "/index.html", "/pos.css", "/pos.js", "/favicon.svg").permitAll();
                     auth.requestMatchers("/api/v1/auth/login").permitAll();
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                     // Health/info dùng cho load balancer & kiểm tra sống; chi tiết health chỉ ADMIN (xem application.yml)
