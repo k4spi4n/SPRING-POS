@@ -65,7 +65,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // API stateless dùng Bearer token, không dùng cookie phiên
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // H2 Console là trang cùng origin; do Referrer-Policy no-referrer, form POST của nó gửi "Origin: null"
+                // nên phải bỏ qua kiểm tra CORS cho đường dẫn này, nếu không sẽ bị 403 "Invalid CORS request"
+                .cors(cors -> cors.configurationSource(request ->
+                        h2ConsoleEnabled && request.getRequestURI().startsWith("/h2-console")
+                                ? null
+                                : corsConfigurationSource().getCorsConfiguration(request)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> {
                     headers.referrerPolicy(ref -> ref.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER));
