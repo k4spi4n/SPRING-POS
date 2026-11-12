@@ -4,9 +4,9 @@ spring:
       on-profile: mysql
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/winmart_wms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:rootpassword}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   h2:

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ed1c24">
+  <title>WinMart · Quầy xuất kho</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="pos.css">
+  <script src="pos.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Đến nội dung chính</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="WinMart — Trang chính"><span class="brand-mark" aria-hidden="true">W</span><span>WinMart <small>VẬN HÀNH KHO</small></span></a>
+    <nav id="workspace-nav" aria-label="Điều hướng chính" hidden><a class="nav-current" href="#catalog">Quầy xuất kho</a><a href="#order">Đơn hiện tại <span id="cart-count" class="badge">0</span></a></nav>
+    <div class="account"><span class="avatar" aria-hidden="true">NV</span><span id="identity">Chưa đăng nhập</span><button id="logout" type="button" class="quiet" hidden>Đăng xuất</button></div>
+  </header>
+  <main id="main">
+    <section class="intro"><div><p class="eyebrow">KHÔNG GIAN LÀM VIỆC</p><h1>Quầy xuất kho</h1><p>Chọn hàng và tạo phiếu xuất đến điểm nhận.</p></div><span class="pill"><span aria-hidden="true">✓</span> Ưu tiên lô gần hết hạn · FEFO</span></section>
+    <section id="login-panel" class="panel login-panel" aria-labelledby="login-title">
+      <div class="login-copy"><span class="login-symbol" aria-hidden="true">W</span><p class="eyebrow">SẴN SÀNG CHO CA LÀM VIỆC</p><h2 id="login-title">Đăng nhập quầy xuất kho</h2><p>Danh mục, giỏ hàng và thông tin giao nhận trong cùng một không gian thao tác.</p><ul class="login-benefits"><li>Tìm nhanh theo tên hoặc mã SKU</li><li>Xuất hàng theo lô còn hạn</li><li>Xác nhận giá và tồn kho từ hệ thống</li></ul></div>
+      <form id="login-form" class="login-form">
+        <fieldset id="login-fields"><legend>Tài khoản làm việc</legend><p class="muted small">Sử dụng tài khoản được quản trị viên cấp.</p>
+          <div class="form-fields">
+            <div class="field"><label for="username">Tên đăng nhập</label><input id="username" name="username" autocomplete="username" maxlength="50" required aria-describedby="username-error"><p id="username-error" class="field-error" hidden></p></div>
+            <div class="field"><label for="password">Mật khẩu</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="72" required aria-describedby="password-error"><p id="password-error" class="field-error" hidden></p></div>
+          </div>
+          <button class="primary" id="login-button" type="submit">Đăng nhập</button><p id="login-message" role="alert" class="message" hidden></p>
+        </fieldset>
+      </form>
+    </section>
+    <noscript><p class="message error">Cần bật JavaScript để đăng nhập và tạo đơn.</p></noscript>
+    <div id="workspace" class="workspace" hidden>
+      <section id="catalog" class="panel catalog" aria-labelledby="catalog-title">
+        <div class="section-heading"><div><p class="eyebrow">DANH MỤC HÀNG HÓA</p><h2 id="catalog-title">Chọn sản phẩm</h2><p class="muted small">Thêm sản phẩm để bắt đầu đơn xuất kho.</p></div><button id="reload" class="quiet" type="button"><span aria-hidden="true">↻</span> Tải lại</button></div>
+        <form id="search-form" class="search"><label for="search">Tìm sản phẩm</label><div class="search-row"><div class="search-input"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" name="search" type="search" placeholder="Nhập tên hoặc mã SKU…" aria-describedby="search-help"></div><button type="submit" class="primary">Tìm kiếm</button></div><p id="search-help" class="small muted">Nhấn Enter để tìm kiếm.</p></form>
+        <div class="filters"><div class="field"><label for="category">Nhóm hàng</label><select id="category"><option value="">Tất cả nhóm hàng</option></select></div><div class="field"><label for="sort">Sắp xếp</label><select id="sort"><option value="name,asc">Tên: A → Z</option><option value="sellingPrice,asc">Giá: thấp đến cao</option><option value="sellingPrice,desc">Giá: cao đến thấp</option></select></div></div>
+        <p id="category-message" role="status" class="message" hidden></p>
+        <div class="catalog-summary"><span id="catalog-count">Danh mục sản phẩm</span><button id="reset-search" type="button" class="text-button" hidden>Xóa bộ lọc</button></div>
+        <p id="catalog-message" role="status" class="message" hidden></p>
+        <div id="products" class="products" aria-label="Danh sách sản phẩm"></div>
+        <div id="catalog-empty" class="empty-state" hidden><span class="empty-symbol" aria-hidden="true">⌕</span><h3>Không tìm thấy sản phẩm</h3><p>Thử từ khóa khác hoặc bỏ bộ lọc nhóm hàng.</p><button id="empty-reset" class="quiet" type="button">Xem tất cả sản phẩm</button></div>
+        <button id="catalog-retry" type="button" class="quiet" hidden>Thử tải lại sản phẩm</button>
+        <div class="pagination"><button id="previous" class="quiet" type="button" disabled>← Trước</button><span id="page-info" role="status"></span><button id="next" class="quiet" type="button" disabled>Sau →</button></div>
+      </section>
+      <section id="order" class="panel order" aria-labelledby="order-title">
+        <div class="section-heading"><div><p class="eyebrow">ĐƠN HIỆN TẠI</p><h2 id="order-title" tabindex="-1">Đơn xuất kho</h2><p class="muted small">Kiểm tra sản phẩm và điểm nhận.</p></div><span class="draft-status">Bản nháp</span></div>
+        <form id="order-form"><fieldset id="order-fields"><legend class="sr-only">Sản phẩm và thông tin xuất kho</legend>
+          <div class="cart-heading"><span id="cart-summary">Chưa có sản phẩm</span><button id="clear-cart" class="text-button danger-text" type="button" disabled>Xóa giỏ</button></div>
+          <div id="cart" class="cart"></div><button id="undo-remove" type="button" class="quiet undo" hidden>Hoàn tác xóa sản phẩm</button>
+          <div class="order-info"><h3>Thông tin xuất kho</h3>
+            <div class="field"><label for="warehouse">Kho xuất <span class="required">*</span></label><select id="warehouse" name="warehouseId" required aria-describedby="warehouse-error warehouse-message"><option value="">Chọn kho xuất</option></select><p id="warehouse-error" class="field-error" hidden></p><p id="warehouse-message" role="status" class="message" hidden></p></div>
+            <div class="field"><label for="destination">Nơi nhận / Điểm đến <span class="required">*</span></label><input id="destination" name="destination" maxlength="200" placeholder="Ví dụ: WinMart+ Cầu Giấy" required aria-describedby="destination-error"><p id="destination-error" class="field-error" hidden></p></div>
+            <div class="field"><label for="note">Ghi chú <span class="muted">(tùy chọn)</span></label><textarea id="note" name="note" rows="3" maxlength="500" placeholder="Thông tin giao nhận…" aria-describedby="note-error"></textarea><p id="note-error" class="field-error" hidden></p></div>
+          </div>
+          <div class="order-summary"><div class="total"><span>Tổng tạm tính</span><strong id="total" aria-live="polite" aria-atomic="true">0 ₫</strong></div><p class="small muted">Giá cuối cùng và tồn kho được hệ thống xác nhận khi tạo phiếu.</p><button id="submit-order" class="primary checkout" type="submit" disabled>Tạo đơn xuất kho</button><p class="checkout-help small">Xuất kho theo FEFO · Chỉ xuất lô còn hạn</p></div>
+        </fieldset></form>
+        <p id="order-message" role="status" class="message" hidden></p>
+        <section id="result" class="result" aria-labelledby="result-title" tabindex="-1" hidden><span class="success-mark" aria-hidden="true">✓</span><div><p class="eyebrow">ĐÃ XÁC NHẬN</p><h3 id="result-title">Tạo đơn thành công</h3></div><div id="result-content"></div></section>
+      </section>
+    </div>
+    <footer><span>WinMart WMS</span><span>Phiếu xuất kho · Giá và tồn kho xác nhận từ hệ thống</span></footer>
+  </main>
+  <dialog id="discard-dialog" aria-labelledby="discard-title" aria-describedby="discard-description"><h2 id="discard-title">Bỏ bản nháp?</h2><p id="discard-description"></p><div class="dialog-actions"><button id="discard-cancel" type="button" class="quiet" autofocus>Giữ bản nháp</button><button id="discard-confirm" type="button" class="danger">Bỏ bản nháp</button></div></dialog>
+</body>
+</html>

@@ -39,9 +39,9 @@ Mẫu dòng log: `07:50:30.737  INFO [c8c46fe8a1154b04] [admin] c.w.w.…GlobalE
 | Dò mật khẩu không giới hạn | `LoginAttemptService`: sai **5 lần** liên tiếp (theo cặp IP + username, kể cả username không tồn tại) → khóa 15 phút, HTTP `423` + header `Retry-After`. Cấu hình `app.security.login.*`. |
 | Token không thu hồi được | `jti` + `TokenBlacklistService`: `POST /auth/logout` và đổi mật khẩu làm token hiện tại vô hiệu ngay. |
 | Tài khoản bị khóa vẫn dùng được token cũ | `JwtAuthenticationFilter` kiểm tra `isEnabled()` ở mọi request. |
-| JWT secret nằm cứng trong repo | Đọc từ biến môi trường `JWT_SECRET`; từ chối khởi động nếu < 32 ký tự; cảnh báo khi còn dùng secret demo. Thêm kiểm tra `issuer`. |
+| JWT secret nằm cứng trong repo | Triển khai bắt buộc đọc `JWT_SECRET` từ môi trường, tối thiểu 32 byte UTF-8; chỉ `dev` có khóa ngẫu nhiên mỗi lần chạy. Kiểm tra `issuer`. |
 | CORS `*` kèm credentials | Chỉ các origin trong `app.security.cors.allowed-origins` (env `CORS_ALLOWED_ORIGINS`), không credentials. |
-| H2 Console mở cho mọi IP | `web-allow-others=false`; chỉ mở khi `spring.h2.console.enabled=true`; profile `mysql` tắt hẳn. Header `X-Frame-Options: DENY` khi không dùng H2. |
+| H2 Console và dữ liệu demo bật mặc định | Chỉ profile `dev` bật H2 Console (`web-allow-others=false`) và nạp dữ liệu/tài khoản mẫu. Mặc định dùng profile `mysql`, tắt console, header `X-Frame-Options: DENY`. |
 | 401/403 trả body rỗng | `RestAuthenticationEntryPoint` / `RestAccessDeniedHandler` trả JSON chuẩn; 403 được ghi audit. |
 | Mật khẩu yếu (≥ 6 ký tự) | ≥ 8 ký tự, có chữ và số, tối đa 72 (giới hạn BCrypt). |
 | `sort` tùy ý, `size` không giới hạn | Whitelist trường sắp xếp; `size` tối đa 100. |
@@ -152,8 +152,8 @@ Nguyên tắc: lỗi client → log `WARN` một dòng; lỗi hệ thống → l
 
 | Biến | Ý nghĩa | Mặc định |
 | :--- | :--- | :--- |
-| `JWT_SECRET` | Khóa ký JWT (≥ 32 ký tự) — **bắt buộc đặt khi triển khai thật** | secret demo (có cảnh báo) |
+| `JWT_SECRET` | Khóa ký JWT (≥ 32 byte UTF-8) — **bắt buộc khi triển khai** | Không có; riêng `dev` sinh ngẫu nhiên mỗi lần chạy |
 | `JWT_EXPIRATION_MS` | Thời hạn token | 86400000 (24h) |
-| `CORS_ALLOWED_ORIGINS` | Danh sách origin, phân cách bằng dấu phẩy | localhost:3000/4200/5173/8080 |
+| `CORS_ALLOWED_ORIGINS` | Danh sách origin đầy đủ, phân cách bằng dấu phẩy | Không cho khác origin; riêng `dev`: http://localhost:3000/4200/5173/8080 |
 | `LOG_PATH` | Thư mục log | `logs` |
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Kết nối MySQL (profile `mysql`) | localhost / root / rootpassword |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Kết nối MySQL (profile `mysql`, cũng là profile mặc định) | Không có, bắt buộc cung cấp qua môi trường |

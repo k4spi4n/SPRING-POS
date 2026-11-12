@@ -36,7 +36,7 @@ public class SecurityConfig {
     private final RestAccessDeniedHandler accessDeniedHandler;
 
     /** Danh sách origin được phép gọi API từ trình duyệt (app.security.cors.allowed-origins). */
-    @Value("${app.security.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.security.cors.allowed-origins:}")
     private String[] allowedOrigins;
 
     /** H2 Console chỉ mở ở môi trường demo (spring.h2.console.enabled=true). */
@@ -85,6 +85,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET,
+                            "/", "/index.html", "/pos.css", "/pos.js", "/favicon.svg").permitAll();
                     auth.requestMatchers("/api/v1/auth/login").permitAll();
                     auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                     // Health/info dùng cho load balancer & kiểm tra sống; chi tiết health chỉ ADMIN (xem application.yml)

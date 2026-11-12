@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    /** Secret mặc định chỉ dành cho demo; xuất hiện trong repo nên KHÔNG an toàn cho môi trường thật. */
-    private static final String DEV_DEFAULT_SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
     private static final int MIN_SECRET_BYTES = 32;
 
     private final SecretKey key;
@@ -37,9 +35,6 @@ public class JwtTokenProvider {
         if (secretBytes.length < MIN_SECRET_BYTES) {
             throw new IllegalStateException("app.jwt.secret (biến môi trường JWT_SECRET) phải dài tối thiểu "
                     + MIN_SECRET_BYTES + " ký tự để đảm bảo an toàn cho HS256");
-        }
-        if (DEV_DEFAULT_SECRET.equals(secret)) {
-            log.warn("!!! Đang dùng JWT secret mặc định dành cho DEV. Hãy đặt biến môi trường JWT_SECRET trước khi triển khai thật.");
         }
         this.key = Keys.hmacShaKeyFor(secretBytes);
         this.jwtExpirationMs = jwtExpirationMs;

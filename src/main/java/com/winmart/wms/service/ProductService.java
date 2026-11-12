@@ -30,9 +30,13 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
 
-    public PageResponse<ProductResponse> getProducts(String search, Pageable pageable) {
+    public PageResponse<ProductResponse> getProducts(String search, Long categoryId, Pageable pageable) {
         Page<Product> productPage;
-        if (search != null && !search.isBlank()) {
+        if (categoryId != null) {
+            String keyword = search == null || search.isBlank() ? "" : search;
+            productPage = productRepository.findByCategoryIdAndNameContainingIgnoreCaseOrCategoryIdAndSkuContainingIgnoreCase(
+                    categoryId, keyword, categoryId, keyword, pageable);
+        } else if (search != null && !search.isBlank()) {
             productPage = productRepository.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(search, search, pageable);
         } else {
             productPage = productRepository.findAll(pageable);

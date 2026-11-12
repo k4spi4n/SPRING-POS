@@ -37,6 +37,7 @@ public class ProductController {
     @Operation(summary = "Lấy danh sách sản phẩm có phân trang và tìm kiếm theo tên/SKU")
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProducts(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String[] sort) {
@@ -50,7 +51,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_PAGE_SIZE),
                 Sort.by(direction, sort[0]));
 
-        return ResponseEntity.ok(ApiResponse.success(productService.getProducts(search, pageable)));
+        return ResponseEntity.ok(ApiResponse.success(productService.getProducts(search, categoryId, pageable)));
     }
 
     @GetMapping("/all")
